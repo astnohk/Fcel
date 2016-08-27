@@ -1,0 +1,25 @@
+#pool{
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 20px;
+	height: 1080px;
+	width: 1920px;
+}
+
+.fcel{
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	position: absolute;
+	height: 40px;
+	width: 200px;
+	padding: 4px;
+	outline-style: solid;
+	outline-width: 2px;
+	outline-color: rgba(196, 196, 196, 0.8);
+	color: rgb(240, 240, 240);
+	background-color: rgba(20, 20, 20, 0.8);
+	cursor: default;
+}
+
