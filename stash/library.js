@@ -71,6 +71,7 @@ createWindow(parameter)
 	}
 	// Set class
 	win.className = "classWindow";
+	win.windowClassName = "classWindow";
 	win.dialog = false;
 	win.style.top = String(100 + Math.min(WindowList.length * 10, 200)) + "px";
 	win.style.left = String(40 + Math.min(WindowList.length * 10, 200)) + "px";
@@ -156,6 +157,15 @@ createWindow(parameter)
 	return win;
 }
 
+function createDraggableElement(elementName)
+{
+	var element = document.createElement(elementName);
+	element.windowClassName = "classDraggableElement";
+	element.addEventListener("mousedown", dragWindow, false);
+	element.addEventListener("touchstart", dragWindow, false);
+	return element;
+}
+
 function raiseWindowList(target)
 {
 	var index = WindowList.indexOf(target);
@@ -208,10 +218,10 @@ dragWindow(event)
 	var win = null;
 	if (event.type === "mousedown" || event.type === "touchstart") {
 		// Raise selected window to frontmost
-		if (event.currentTarget.className === "classWindow") {
+		if (event.currentTarget.windowClassName === "classWindow") {
 			raiseWindowList(event.currentTarget);
 		}
-		if (event.target.className === "classWindow") {
+		if (event.target.windowClassName === "classWindow" || event.target.windowClassName === "classDraggableElement") {
 			win = event.target;
 		} else if (event.target.className === "classWindowResizer") {
 			resizingWindow = true;
