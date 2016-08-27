@@ -6,6 +6,21 @@
 	height: 1080px;
 	width: 1920px;
 }
+#addCell{
+	z-index: 100;
+	position: absolute;
+	top: 2px;
+	left: 40%;
+	padding-left: 10px;
+	padding-right: 10px;
+	outline-style: solid;
+	outline-width: 2px;
+	outline-color: rgb(255, 100, 100);
+	font-size: 38px;
+	font-weight: bold;
+	color: rgb(255, 100, 100);
+	cursor: pointer;
+}
 
 .fcel{
 	display: flex;
@@ -15,9 +30,12 @@
 	height: 40px;
 	width: 200px;
 	padding: 4px;
-	outline-style: solid;
-	outline-width: 2px;
-	outline-color: rgba(196, 196, 196, 0.8);
+	border-style: solid;
+	border-width: 2px;
+	border-color: rgba(196, 196, 196, 0.8);
+	outline-style: none;
+	outline-width: 4px;
+	outline-color: rgba(255, 0, 0, 0.8);
 	color: rgb(240, 240, 240);
 	background-color: rgba(20, 20, 20, 0.8);
 	cursor: default;

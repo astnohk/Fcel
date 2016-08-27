@@ -14,11 +14,14 @@ var prev_clientY = 0;
 var Cells = new Array();
 var CellsID = 0;
 
+var selected;
+
 
 
 // Events
 window.addEventListener("load", init, false);
 window.addEventListener("mousemove", draw, false);
+window.addEventListener("mousedown", draw, false);
 
 
 
@@ -31,6 +34,8 @@ init()
 	poolStyle = window.getComputedStyle(pool);
 	sizePool.width = parseInt(poolStyle.width, 10);
 	sizePool.height = parseInt(poolStyle.height, 10);
+	// Events
+	document.getElementById("addCell").addEventListener("mousedown", makeCell, false);
 	// Initialize canvas
 	canvas = document.getElementById("mainPool");
 	canvas.addEventListener("mousedown", mouseClick, false);
@@ -54,8 +59,7 @@ makeCell()
 	cell.className = "fcel";
 	cell.style.top = window.innerHeight * Math.random() + "px";
 	cell.style.left = window.innerWidth * Math.random() + "px";
-	cell.addEventListener("mousedown", dragWindow, false);
-	cell.addEventListener("touchstart", dragWindow, false);
+	cell.addEventListener("mousedown", function (event) { selected = event.target; }, false);
 	document.getElementById("pool").appendChild(cell);
 	Cells.push(cell);
 }
@@ -64,6 +68,7 @@ function
 draw()
 {
 	drawLines();
+	drawSelected();
 }
 
 function
@@ -85,6 +90,15 @@ drawLines()
 		context.stroke();
 		cell0 = cell1;
 	}
+}
+
+function
+drawSelected()
+{
+	for (var i = 0; i < Cells.length; i++) {
+		Cells[i].style.outlineStyle = "none";
+	}
+	selected.style.outlineStyle = "solid";
 }
 
 
