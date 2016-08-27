@@ -12,9 +12,11 @@ var prev_clientX = 0;
 var prev_clientY = 0;
 
 var Cells = new Array();
+var Networks = new Array();
 var CellsID = 0;
 
-var selected;
+var selected = null;
+var selected_old = null;
 
 
 
@@ -35,7 +37,10 @@ init()
 	sizePool.width = parseInt(poolStyle.width, 10);
 	sizePool.height = parseInt(poolStyle.height, 10);
 	// Events
+	pool.addEventListener("mousedown", unselectCell, false);
 	document.getElementById("addCell").addEventListener("mousedown", makeCell, false);
+	document.getElementById("connectCells").addEventListener("mousedown", connectCells, false);
+	document.getElementById("sumCells").addEventListener("mousedown", sumCells, false);
 	// Initialize canvas
 	canvas = document.getElementById("mainPool");
 	canvas.addEventListener("mousedown", mouseClick, false);
@@ -59,9 +64,64 @@ makeCell()
 	cell.className = "fcel";
 	cell.style.top = window.innerHeight * Math.random() + "px";
 	cell.style.left = window.innerWidth * Math.random() + "px";
-	cell.addEventListener("mousedown", function (event) { selected = event.target; }, false);
+	cell.addEventListener("mousedown", selectCell, false);
 	document.getElementById("pool").appendChild(cell);
 	Cells.push(cell);
+}
+
+function
+selectCell(event)
+{
+	if ((event.type === "mousedown" && event.button == 0) ||
+	    (event.type === "touchstart" && event.touches.length == 1)) {
+		if (event.target != selected) {
+			selected_old = selected;
+			selected = event.target;
+		}
+	}
+}
+
+function
+unselectCell(event)
+{
+	if (event.target.id === "pool") {
+		selected = null;
+		selected_old = null;
+	}
+}
+
+function
+connectCells()
+{
+	if (selected == null || selected_old == null) {
+		return;
+	}
+	var net_selected = null;
+	var net_selected_old = null;
+	for (var i = 0; i < Networks.length; i++) {
+		for (var j = 0; j < Networks[i].length; j++) {
+			if (Networks[i][j] == selected) {
+				net_selected = i;
+			} else if (Networks[i][j] == selected_old) {
+				net_selected_old = i;
+			}
+		}
+	}
+	if (net_selected == null && net_selected_old == null) {
+		Networks.push([selected_old, selected]);
+	} else if (net_selected == net_selected_old) {
+		return;
+	} else if (net_selected == null) {
+		Networks[net_selected_old].push(selected);
+	} else {
+		Array.prototype.push.apply(Networks[net_selected], Networks[net_selected_old]);
+		Networks.splice(net_selected_old, 1);
+	}
+}
+
+function
+sumCells()
+{
 }
 
 function
@@ -76,19 +136,22 @@ drawLines()
 {
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	context.strokeStyle = 'lime';
-	var cell0 = window.getComputedStyle(Cells[0]);
+	var cell0;
 	var cell1;
-	for (var i = 1; i < Cells.length; i++) {
-		context.beginPath();
-		cell1 = window.getComputedStyle(Cells[i]);
-		context.moveTo(
-		    parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
-		    parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2);
-		context.lineTo(
-		    parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
-		    parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2);
-		context.stroke();
-		cell0 = cell1;
+	for (var i = 0; i < Networks.length; i++) {
+		cell0 = window.getComputedStyle(Networks[i][0]);
+		for (var j = 1; j < Networks[i].length; j++) {
+			context.beginPath();
+			cell1 = window.getComputedStyle(Networks[i][j]);
+			context.moveTo(
+			    parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
+			    parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2);
+			context.lineTo(
+			    parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
+			    parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2);
+			context.stroke();
+			cell0 = cell1;
+		}
 	}
 }
 
@@ -98,7 +161,14 @@ drawSelected()
 	for (var i = 0; i < Cells.length; i++) {
 		Cells[i].style.outlineStyle = "none";
 	}
-	selected.style.outlineStyle = "solid";
+	if (selected != null) {
+		selected.style.outlineStyle = "solid";
+		selected.style.outlineColor = "rgba(255, 0, 0, 0.8)";
+	}
+	if (selected_old != null) {
+		selected_old.style.outlineStyle = "solid";
+		selected_old.style.outlineColor = "rgba(0, 255, 0, 0.8)";
+	}
 }
 
 
