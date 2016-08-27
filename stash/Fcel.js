@@ -58,14 +58,15 @@ init()
 function
 makeCell()
 {
-	var cell = createDraggableElement("div");
+	var cell = createDraggableElement("input");
 	cell.id = "fcel" + CellsID;
 	CellsID++;
 	cell.className = "fcel";
+	cell.type = "text";
 	cell.style.top = window.innerHeight * Math.random() + "px";
 	cell.style.left = window.innerWidth * Math.random() + "px";
 	cell.addEventListener("mousedown", selectCell, false);
-	document.getElementById("pool").appendChild(cell);
+	pool.appendChild(cell);
 	Cells.push(cell);
 }
 

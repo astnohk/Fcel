@@ -31,13 +31,14 @@
 	cursor: pointer;
 }
 
-.fcel{
+input[type="text"], input[type="password"] .fcel{
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
 	position: absolute;
 	height: 40px;
 	width: 200px;
+	margin: 0;
 	padding: 4px;
 	border-style: solid;
 	border-width: 2px;
@@ -45,6 +46,7 @@
 	outline-style: none;
 	outline-width: 4px;
 	outline-color: rgba(255, 0, 0, 0.8);
+	font-size: 20px;
 	color: rgb(240, 240, 240);
 	background-color: rgba(20, 20, 20, 0.8);
 	cursor: default;
