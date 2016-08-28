@@ -280,7 +280,7 @@ draw()
 	// Refresh
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	// Background
-	context.fillStyle = negateColor("rgba(" + colormap[currentLayer].red + "," + colormap[currentLayer].green + "," + colormap[currentLayer].blue + ",0.2)");
+	context.fillStyle = negateColor("rgba(" + colormap[currentLayer].red + "," + colormap[currentLayer].green + "," + colormap[currentLayer].blue + ",0.1)");
 	context.fillRect(0, 0, canvas.width, canvas.height);
 	// Draw
 	drawLines();
@@ -296,7 +296,7 @@ drawLines()
 	for (var n = 0; n < Layers.length; n++) {
 		context.strokeStyle = "rgb(" + colormap[n].red + "," + colormap[n].green + "," + colormap[n].blue + ")";
 		if (n == currentLayer) {
-			context.lineWidth = 4;
+			context.lineWidth = 6;
 		} else {
 			context.lineWidth = 2;
 		}
@@ -316,6 +316,8 @@ drawLines()
 			}
 		}
 	}
+	// Reset context
+	context.lineWidth = 1;
 }
 
 function
