@@ -27,7 +27,9 @@ var selected_old = null;
 // Events
 window.addEventListener("load", init, false);
 window.addEventListener("mousemove", draw, false);
+window.addEventListener("touchmove", draw, false);
 window.addEventListener("mousedown", function (event) { updateCells(); draw(); }, false);
+window.addEventListener("touchstart", function (event) { updateCells(); draw(); }, false);
 window.addEventListener("change", function (event) { updateCells(); draw(); }, false);
 
 
@@ -47,9 +49,9 @@ init()
 	document.getElementById("deleteCell").addEventListener("mousedown", deleteCell, false);
 	document.getElementById("connectCells").addEventListener("mousedown", connectSelectedCells, false);
 	document.getElementById("sumCells").addEventListener("mousedown", sumSelectedNetwork, false);
-	document.getElementById("LayerUp").addEventListener("mousedown", function () { if (currentLayer < Layers.length - 1) { currentLayer++; } }, false);
-	document.getElementById("LayerDown").addEventListener("mousedown", function () { if (currentLayer > 0) { currentLayer--; } }, false);
-	document.getElementById("LayerAdd").addEventListener("mousedown", addLayer, false);
+	document.getElementById("layerUp").addEventListener("mousedown", function () { if (currentLayer < Layers.length - 1) { currentLayer++; } }, false);
+	document.getElementById("layerDown").addEventListener("mousedown", function () { if (currentLayer > 0) { currentLayer--; } }, false);
+	document.getElementById("layerAdd").addEventListener("mousedown", addLayer, false);
 	// Initialize canvas
 	canvas = document.getElementById("mainPool");
 	canvas.addEventListener("mousedown", mouseClick, false);
