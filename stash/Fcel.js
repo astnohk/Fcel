@@ -108,6 +108,7 @@ addLayer()
 		selector.addEventListener("mousedown", function (event) { currentLayer = parseInt(event.target.id.slice(event.target.id.indexOf('0')), 10); }, false);
 		layerSelector.appendChild(selector);
 		layerSelector.style.width = (40 + offset * (Layers.length - 1)) + "px";
+		currentLayer = Layers.length - 1;
 	}
 }
 
@@ -290,11 +291,11 @@ drawLines()
 	var cell0;
 	var cell1;
 	for (var n = 0; n < Layers.length; n++) {
-		context.strokeStyle = "rgb(" + colormap[n].red + "," + colormap[n].green + "," + colormap[n].blue + ")";
+		context.strokeStyle = "rgba(" + colormap[n].red + "," + colormap[n].green + "," + colormap[n].blue + ",0.8)";
 		if (n == currentLayer) {
 			context.lineWidth = 6;
 		} else {
-			context.lineWidth = 2;
+			context.lineWidth = 3;
 		}
 		for (var i = 0; i < Layers[n].Networks.length; i++) {
 			cell0 = window.getComputedStyle(Layers[n].Networks[i][0]);
