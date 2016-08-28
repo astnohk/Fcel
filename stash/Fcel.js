@@ -24,6 +24,7 @@ var selected_old = null;
 window.addEventListener("load", init, false);
 window.addEventListener("mousemove", draw, false);
 window.addEventListener("mousedown", draw, false);
+window.addEventListener("change", function (event) { updateCells(); draw(); }, false);
 
 
 
@@ -39,8 +40,8 @@ init()
 	// Events
 	pool.addEventListener("mousedown", unselectCell, false);
 	document.getElementById("addCell").addEventListener("mousedown", makeCell, false);
-	document.getElementById("connectCells").addEventListener("mousedown", connectCells, false);
-	document.getElementById("sumCells").addEventListener("mousedown", sumCells, false);
+	document.getElementById("connectCells").addEventListener("mousedown", connectSelectedCells, false);
+	document.getElementById("sumCells").addEventListener("mousedown", sumSelectedNetwork, false);
 	// Initialize canvas
 	canvas = document.getElementById("mainPool");
 	canvas.addEventListener("mousedown", mouseClick, false);
@@ -68,6 +69,7 @@ makeCell()
 	cell.addEventListener("mousedown", selectCell, false);
 	pool.appendChild(cell);
 	Cells.push(cell);
+	return cell;
 }
 
 function
@@ -92,37 +94,104 @@ unselectCell(event)
 }
 
 function
-connectCells()
+getNetwork(cell)
 {
-	if (selected == null || selected_old == null) {
-		return;
-	}
-	var net_selected = null;
-	var net_selected_old = null;
 	for (var i = 0; i < Networks.length; i++) {
 		for (var j = 0; j < Networks[i].length; j++) {
-			if (Networks[i][j] == selected) {
-				net_selected = i;
-			} else if (Networks[i][j] == selected_old) {
-				net_selected_old = i;
+			if (Networks[i][j] == cell) {
+				return Networks[i];
 			}
 		}
 	}
-	if (net_selected == null && net_selected_old == null) {
-		Networks.push([selected_old, selected]);
-	} else if (net_selected == net_selected_old) {
+	return null;
+}
+
+function
+connectSelectedCells()
+{
+	connectCells(selected, selected_old);
+}
+
+function
+connectCells(cell0, cell1)
+{
+	if (cell0 == null || cell1 == null) {
 		return;
-	} else if (net_selected == null) {
-		Networks[net_selected_old].push(selected);
+	}
+	var net0 = getNetwork(cell0);
+	var net1 = getNetwork(cell1);
+	if (net0 == null && net1 == null) {
+		Networks.push([cell0, cell1]);
+	} else if (net0 == net1) {
+		return;
+	} else if (net0 == null) {
+		net1.push(cell0);
+	} else if (net1 == null) {
+		net0.push(cell1);
 	} else {
-		Array.prototype.push.apply(Networks[net_selected], Networks[net_selected_old]);
-		Networks.splice(net_selected_old, 1);
+		Array.prototype.push.apply(net0, net1);
+		Networks.splice(Networks.indexOf(net1), 1);
 	}
 }
 
 function
-sumCells()
+sumSelectedNetwork()
 {
+	var net = getNetwork(selected);
+	if (net == null) {
+		return;
+	}
+	for (var i = 0; i < net.length; i++) {
+		if (net[i].className === "fcelSum") {
+			updateCellsSum();
+			return;
+		}
+	}
+	makeCellSum(selected);
+}
+
+function
+makeCellSum(cell)
+{
+	var cellSum = makeCell();
+	cellSum.className = "fcelSum";
+	var net = getNetwork(cell);
+	var sum = 0;
+	for (var j = 0; j < net.length; j++) {
+		var num = parseInt(net[j].value, 10);
+		if (num == num) {
+			sum += num;
+		}
+	}
+	cellSum.value = sum;
+	// Connect sum cell to Network of cell
+	connectCells(selected, cellSum);
+}
+
+function
+updateCellsSum()
+{
+	var sumCells = document.getElementsByClassName("fcelSum");
+	for (var i = 0; i < sumCells.length; i++) {
+		var net = getNetwork(sumCells[i]);
+		var sum = 0;
+		for (var j = 0; j < net.length; j++) {
+			if (net[j] == sumCells[i]) {
+				continue;
+			}
+			var num = parseInt(net[j].value, 10);
+			if (isNaN(num) == false) {
+				sum += num;
+			}
+		}
+		sumCells[i].value = sum;
+	}
+}
+
+function
+updateCells()
+{
+	updateCellsSum();
 }
 
 function

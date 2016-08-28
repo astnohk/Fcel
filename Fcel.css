@@ -1,4 +1,4 @@
-#pool{
+#pool {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -7,7 +7,7 @@
 	width: 1920px;
 }
 
-#fcelToolbar{
+#fcelToolbar {
 	z-index: 100;
 	display: flex;
 	flex-direction: row;
@@ -16,7 +16,7 @@
 	left: 30%;
 }
 
-.fcelTools{
+.fcelTools {
 	display: flex;
 	margin: 2px;
 	margin-left: 14px;
@@ -31,7 +31,7 @@
 	cursor: pointer;
 }
 
-input[type="text"], input[type="password"] .fcel{
+input[type="text"].fcel, input[type="password"].fcel {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: nowrap;
@@ -43,6 +43,27 @@ input[type="text"], input[type="password"] .fcel{
 	border-style: solid;
 	border-width: 2px;
 	border-color: rgba(196, 196, 196, 0.8);
+	outline-style: none;
+	outline-width: 4px;
+	outline-color: rgba(255, 0, 0, 0.8);
+	font-size: 20px;
+	color: rgb(240, 240, 240);
+	background-color: rgba(20, 20, 20, 0.8);
+	cursor: default;
+}
+
+input[type="text"].fcelSum, input[type="password"].fcelSum {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	position: absolute;
+	height: 40px;
+	width: 200px;
+	margin: 0;
+	padding: 4px;
+	border-style: solid;
+	border-width: 2px;
+	border-color: rgba(40, 40, 255, 0.8);
 	outline-style: none;
 	outline-width: 4px;
 	outline-color: rgba(255, 0, 0, 0.8);
