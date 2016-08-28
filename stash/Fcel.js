@@ -235,17 +235,11 @@ addCellSum(cell)
 	var cellSum = addCell();
 	cellSum.className = "fcelSum";
 	cellSum.layer = currentLayer;
-	var net = getNetwork(cell);
-	var sum = 0;
-	for (var j = 0; j < net.length; j++) {
-		var num = parseInt(net[j].value, 10);
-		if (num == num) {
-			sum += num;
-		}
-	}
-	cellSum.value = sum;
+	cellSum.value = 0;
 	// Connect sum cell to Network of cell
 	connectCells(selected, cellSum);
+	// Update
+	updateCellsSum();
 }
 
 function
@@ -256,7 +250,7 @@ updateCellsSum()
 		var net = getNetworkOnLayer(sumCells[i], sumCells[i].layer);
 		var sum = 0;
 		for (var j = 0; j < net.length; j++) {
-			if (net[j] == sumCells[i]) {
+			if (net[j].className === "fcelSum" && net[j].layer == sumCells[i].layer) {
 				continue;
 			}
 			var num = parseInt(net[j].value, 10);
