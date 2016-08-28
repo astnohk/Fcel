@@ -41,11 +41,11 @@ input[type="text"].fcel, input[type="password"].fcel {
 	margin: 0;
 	padding: 4px;
 	border-style: solid;
-	border-width: 2px;
+	border-width: 4px;
 	border-color: rgba(196, 196, 196, 0.8);
 	outline-style: none;
 	outline-width: 4px;
-	outline-color: rgba(255, 0, 0, 0.8);
+	outline-color: rgba(255, 0, 0, 0.7);
 	font-size: 20px;
 	color: rgb(240, 240, 240);
 	background-color: rgba(20, 20, 20, 0.8);
@@ -62,11 +62,11 @@ input[type="text"].fcelSum, input[type="password"].fcelSum {
 	margin: 0;
 	padding: 4px;
 	border-style: solid;
-	border-width: 2px;
-	border-color: rgba(40, 40, 255, 0.8);
+	border-width: 4px;
+	border-color: rgba(80, 80, 255, 0.8);
 	outline-style: none;
 	outline-width: 4px;
-	outline-color: rgba(255, 0, 0, 0.8);
+	outline-color: rgba(255, 0, 0, 0.7);
 	font-size: 20px;
 	color: rgb(240, 240, 240);
 	background-color: rgba(20, 20, 20, 0.8);

@@ -233,11 +233,11 @@ drawSelected()
 	}
 	if (selected != null) {
 		selected.style.outlineStyle = "solid";
-		selected.style.outlineColor = "rgba(255, 0, 0, 0.8)";
+		selected.style.outlineColor = "rgba(255, 0, 0, 0.7)";
 	}
 	if (selected_old != null) {
 		selected_old.style.outlineStyle = "solid";
-		selected_old.style.outlineColor = "rgba(0, 255, 0, 0.8)";
+		selected_old.style.outlineColor = "rgba(0, 255, 0, 0.7)";
 	}
 }
 
