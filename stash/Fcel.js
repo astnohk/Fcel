@@ -48,10 +48,11 @@ init()
 	document.getElementById("addCell").addEventListener("mousedown", addCell, false);
 	document.getElementById("deleteCell").addEventListener("mousedown", deleteCell, false);
 	document.getElementById("connectCells").addEventListener("mousedown", connectSelectedCells, false);
+	document.getElementById("layerAdd").addEventListener("mousedown", addLayer, false);
 	document.getElementById("sumCells").addEventListener("mousedown", sumSelectedNetwork, false);
+	document.getElementById("prodCells").addEventListener("mousedown", prodSelectedNetwork, false);
 	document.getElementById("layerUp").addEventListener("mousedown", function () { if (currentLayer < Layers.length - 1) { currentLayer++; } }, false);
 	document.getElementById("layerDown").addEventListener("mousedown", function () { if (currentLayer > 0) { currentLayer--; } }, false);
-	document.getElementById("layerAdd").addEventListener("mousedown", addLayer, false);
 	// Initialize canvas
 	canvas = document.getElementById("mainPool");
 	canvas.addEventListener("mousedown", mouseClick, false);
@@ -253,7 +254,8 @@ updateCellsSum()
 		var net = getNetworkOnLayer(sumCells[i], sumCells[i].layer);
 		var sum = 0;
 		for (var j = 0; j < net.length; j++) {
-			if (net[j].className === "fcelSum" && net[j].layer == sumCells[i].layer) {
+			if ((net[j].className === "fcelSum" || net[j].className === "fcelProd") &&
+			    net[j].layer == sumCells[i].layer) {
 				continue;
 			}
 			var num = parseInt(net[j].value, 10);
@@ -266,9 +268,54 @@ updateCellsSum()
 }
 
 function
+prodSelectedNetwork()
+{
+	var net = getNetwork(selected);
+	if (net == null) {
+		return;
+	}
+	addCellProd(selected);
+}
+
+function
+addCellProd(cell)
+{
+	var cellProd = addCell();
+	cellProd.className = "fcelProd";
+	cellProd.layer = currentLayer;
+	cellProd.value = 0;
+	// Connect prod cell to Network of cell
+	connectCells(selected, cellProd);
+	// Update
+	updateCellsProd();
+}
+
+function
+updateCellsProd()
+{
+	var prodCells = document.getElementsByClassName("fcelProd");
+	for (var i = 0; i < prodCells.length; i++) {
+		var net = getNetworkOnLayer(prodCells[i], prodCells[i].layer);
+		var prod = 1.0;
+		for (var j = 0; j < net.length; j++) {
+			if ((net[j].className === "fcelProd" || net[j].className === "fcelSum") &&
+			    net[j].layer == prodCells[i].layer) {
+				continue;
+			}
+			var num = parseInt(net[j].value, 10);
+			if (isNaN(num) == false) {
+				prod *= num;
+			}
+		}
+		prodCells[i].value = prod;
+	}
+}
+
+function
 updateCells()
 {
 	updateCellsSum();
+	updateCellsProd();
 }
 
 function
@@ -290,12 +337,12 @@ drawLines()
 {
 	var cell0;
 	var cell1;
+	// Draw lines except current layer
+	context.lineWidth = 3;
 	for (var n = 0; n < Layers.length; n++) {
 		context.strokeStyle = "rgba(" + colormap[n].red + "," + colormap[n].green + "," + colormap[n].blue + ",0.8)";
 		if (n == currentLayer) {
-			context.lineWidth = 6;
-		} else {
-			context.lineWidth = 3;
+			continue;
 		}
 		for (var i = 0; i < Layers[n].Networks.length; i++) {
 			cell0 = window.getComputedStyle(Layers[n].Networks[i][0]);
@@ -311,6 +358,24 @@ drawLines()
 				context.stroke();
 				cell0 = cell1;
 			}
+		}
+	}
+	// Draw line on current layer at last
+	context.lineWidth = 6;
+	context.strokeStyle = "rgba(" + colormap[currentLayer].red + "," + colormap[currentLayer].green + "," + colormap[currentLayer].blue + ",0.8)";
+	for (var i = 0; i < Layers[currentLayer].Networks.length; i++) {
+		cell0 = window.getComputedStyle(Layers[currentLayer].Networks[i][0]);
+		for (var j = 1; j < Layers[currentLayer].Networks[i].length; j++) {
+			context.beginPath();
+			cell1 = window.getComputedStyle(Layers[currentLayer].Networks[i][j]);
+			context.moveTo(
+			    parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
+			    parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2);
+			context.lineTo(
+			    parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
+			    parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2);
+			context.stroke();
+			cell0 = cell1;
 		}
 	}
 	// Reset context
