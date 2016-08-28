@@ -123,7 +123,7 @@ createWindow(parameter)
 		    var timeout = setTimeout(function ()
 			{
 				win.closeFunctionUserDefined();
-				win.parentNode.removeChild(win);
+				win.remove();
 				spliceWindowList(win); // Remove window from WindowList
 			},
 			timeDuration);

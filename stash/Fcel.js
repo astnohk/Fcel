@@ -39,7 +39,8 @@ init()
 	sizePool.height = parseInt(poolStyle.height, 10);
 	// Events
 	pool.addEventListener("mousedown", unselectCell, false);
-	document.getElementById("addCell").addEventListener("mousedown", makeCell, false);
+	document.getElementById("addCell").addEventListener("mousedown", addCell, false);
+	document.getElementById("deleteCell").addEventListener("mousedown", deleteCell, false);
 	document.getElementById("connectCells").addEventListener("mousedown", connectSelectedCells, false);
 	document.getElementById("sumCells").addEventListener("mousedown", sumSelectedNetwork, false);
 	// Initialize canvas
@@ -49,15 +50,15 @@ init()
 	canvas.addEventListener("touchstart", mouseClick, false);
 	canvas.addEventListener("touchmove", mouseMove, false);
 	context = canvas.getContext("2d");
-	makeCell();
-	makeCell();
+	addCell();
+	addCell();
 }
 
 
 
 // ----- MAIN -----
 function
-makeCell()
+addCell()
 {
 	var cell = createDraggableElement("input");
 	cell.id = "fcel" + CellsID;
@@ -70,6 +71,23 @@ makeCell()
 	pool.appendChild(cell);
 	Cells.push(cell);
 	return cell;
+}
+
+function
+deleteCell()
+{
+	if (selected == null) {
+		return;
+	}
+	for (var i = 0; i < Networks.length; i++) {
+		var index = Networks[i].indexOf(selected);
+		if (index >= 0) {
+			Networks[i].splice(index, 1);
+		}
+	}
+	Cells.splice(Cells.indexOf(selected), 1);
+	selected.remove();
+	selected = null;
 }
 
 function
@@ -141,19 +159,17 @@ sumSelectedNetwork()
 	if (net == null) {
 		return;
 	}
-	for (var i = 0; i < net.length; i++) {
-		if (net[i].className === "fcelSum") {
-			updateCellsSum();
-			return;
-		}
+	if (selected.className === "fcelSum") {
+		updateCellsSum();
+		return;
 	}
-	makeCellSum(selected);
+	addCellSum(selected);
 }
 
 function
-makeCellSum(cell)
+addCellSum(cell)
 {
-	var cellSum = makeCell();
+	var cellSum = addCell();
 	cellSum.className = "fcelSum";
 	var net = getNetwork(cell);
 	var sum = 0;
