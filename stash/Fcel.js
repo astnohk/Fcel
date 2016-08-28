@@ -11,8 +11,12 @@ var context;
 var prev_clientX = 0;
 var prev_clientY = 0;
 
+var maxNumberOfLayers = 32;
+var currentLayer = 0;
+var Layers = new Array();
+var colormapNumber = maxNumberOfLayers;
+var colormap = new Array(colormapNumber);
 var Cells = new Array();
-var Networks = new Array();
 var CellsID = 0;
 
 var selected = null;
@@ -43,6 +47,9 @@ init()
 	document.getElementById("deleteCell").addEventListener("mousedown", deleteCell, false);
 	document.getElementById("connectCells").addEventListener("mousedown", connectSelectedCells, false);
 	document.getElementById("sumCells").addEventListener("mousedown", sumSelectedNetwork, false);
+	document.getElementById("LayerUp").addEventListener("mousedown", function () { if (currentLayer < Layers.length - 1) { currentLayer++; } }, false);
+	document.getElementById("LayerDown").addEventListener("mousedown", function () { if (currentLayer > 0) { currentLayer--; } }, false);
+	document.getElementById("LayerAdd").addEventListener("mousedown", addLayer, false);
 	// Initialize canvas
 	canvas = document.getElementById("mainPool");
 	canvas.addEventListener("mousedown", mouseClick, false);
@@ -50,6 +57,11 @@ init()
 	canvas.addEventListener("touchstart", mouseClick, false);
 	canvas.addEventListener("touchmove", mouseMove, false);
 	context = canvas.getContext("2d");
+	// Initialize colormap
+	makeColormap();
+	// Initialize layer
+	addLayer();
+	// Add initial cells
 	addCell();
 	addCell();
 }
@@ -57,6 +69,46 @@ init()
 
 
 // ----- MAIN -----
+function
+makeColormap()
+{
+	var tmp = new Array(colormapNumber);
+	for (var i = 0; i < Math.floor(colormapNumber / 2); i++) {
+		tmp[i] = {
+		    red: Math.max(255 - Math.floor(i * 255.0 * 2.0 / colormapNumber), 0),
+		    green: Math.min(Math.floor(i * 255.0 * 2.0 / colormapNumber), 255),
+		    blue: 0};
+	}
+	for (var i = Math.floor(colormapNumber / 2); i < colormapNumber; i++) {
+		tmp[i] = {
+		    red: 0,
+		    green: Math.max(255 - Math.floor((i - colormapNumber / 2) * 255.0 * 2.0 / colormapNumber), 0),
+		    blue: Math.min(Math.floor((i - colormapNumber / 2) * 255.0 * 2.0 / colormapNumber), 255)}
+	}
+	// Shuffle
+	for (var i = 0; i < colormapNumber; i++) {
+		colormap[i] = tmp[(i * Math.round(colormapNumber / 3 + 0.5) + ((i % 2) == 0 ? 0 : Math.round(colormapNumber / 6))) % colormapNumber];
+	}
+}
+
+function
+addLayer()
+{
+	if (Layers.length < maxNumberOfLayers) {
+		var offset = 5;
+		var layerSelector = document.getElementById("layerSelector");
+		Layers.push({Networks: new Array()});
+		var selector = document.createElement("div");
+		selector.className = "layerSelectorLayer";
+		selector.id = "layer0" + (Layers.length - 1);
+		selector.style.left = offset * (Layers.length - 1) + "px";
+		selector.style.backgroundColor = "rgba(" + colormap[Layers.length - 1].red + "," + colormap[Layers.length - 1].green + "," + colormap[Layers.length - 1].blue + ",0.8)";
+		selector.addEventListener("mousedown", function (event) { currentLayer = parseInt(event.target.id.slice(event.target.id.indexOf('0')), 10); }, false);
+		layerSelector.appendChild(selector);
+		layerSelector.style.width = (40 + offset * (Layers.length - 1)) + "px";
+	}
+}
+
 function
 addCell()
 {
@@ -79,10 +131,12 @@ deleteCell()
 	if (selected == null) {
 		return;
 	}
-	for (var i = 0; i < Networks.length; i++) {
-		var index = Networks[i].indexOf(selected);
-		if (index >= 0) {
-			Networks[i].splice(index, 1);
+	for (var n = 0; n < Layers.length; n++) {
+		for (var i = 0; i < Layers[n].Networks.length; i++) {
+			var index = Layers[n].Networks[i].indexOf(selected);
+			if (index >= 0) {
+				Layers[n].Networks[i].splice(index, 1);
+			}
 		}
 	}
 	Cells.splice(Cells.indexOf(selected), 1);
@@ -114,10 +168,23 @@ unselectCell(event)
 function
 getNetwork(cell)
 {
-	for (var i = 0; i < Networks.length; i++) {
-		for (var j = 0; j < Networks[i].length; j++) {
-			if (Networks[i][j] == cell) {
-				return Networks[i];
+	for (var i = 0; i < Layers[currentLayer].Networks.length; i++) {
+		for (var j = 0; j < Layers[currentLayer].Networks[i].length; j++) {
+			if (Layers[currentLayer].Networks[i][j] == cell) {
+				return Layers[currentLayer].Networks[i];
+			}
+		}
+	}
+	return null;
+}
+
+function
+getNetworkOnLayer(cell, layerIndex)
+{
+	for (var i = 0; i < Layers[layerIndex].Networks.length; i++) {
+		for (var j = 0; j < Layers[layerIndex].Networks[i].length; j++) {
+			if (Layers[layerIndex].Networks[i][j] == cell) {
+				return Layers[layerIndex].Networks[i];
 			}
 		}
 	}
@@ -139,7 +206,7 @@ connectCells(cell0, cell1)
 	var net0 = getNetwork(cell0);
 	var net1 = getNetwork(cell1);
 	if (net0 == null && net1 == null) {
-		Networks.push([cell0, cell1]);
+		Layers[currentLayer].Networks.push([cell0, cell1]);
 	} else if (net0 == net1) {
 		return;
 	} else if (net0 == null) {
@@ -148,7 +215,7 @@ connectCells(cell0, cell1)
 		net0.push(cell1);
 	} else {
 		Array.prototype.push.apply(net0, net1);
-		Networks.splice(Networks.indexOf(net1), 1);
+		Layers[currentLayer].Networks.splice(Layers[currentLayer].Networks.indexOf(net1), 1);
 	}
 }
 
@@ -159,10 +226,6 @@ sumSelectedNetwork()
 	if (net == null) {
 		return;
 	}
-	if (selected.className === "fcelSum") {
-		updateCellsSum();
-		return;
-	}
 	addCellSum(selected);
 }
 
@@ -171,6 +234,7 @@ addCellSum(cell)
 {
 	var cellSum = addCell();
 	cellSum.className = "fcelSum";
+	cellSum.layer = currentLayer;
 	var net = getNetwork(cell);
 	var sum = 0;
 	for (var j = 0; j < net.length; j++) {
@@ -189,7 +253,7 @@ updateCellsSum()
 {
 	var sumCells = document.getElementsByClassName("fcelSum");
 	for (var i = 0; i < sumCells.length; i++) {
-		var net = getNetwork(sumCells[i]);
+		var net = getNetworkOnLayer(sumCells[i], sumCells[i].layer);
 		var sum = 0;
 		for (var j = 0; j < net.length; j++) {
 			if (net[j] == sumCells[i]) {
@@ -213,30 +277,43 @@ updateCells()
 function
 draw()
 {
+	// Refresh
 	context.clearRect(0, 0, canvas.width, canvas.height);
+	// Background
+	context.fillStyle = negateColor("rgba(" + colormap[currentLayer].red + "," + colormap[currentLayer].green + "," + colormap[currentLayer].blue + ",0.2)");
+	context.fillRect(0, 0, canvas.width, canvas.height);
+	// Draw
 	drawLines();
 	drawSelected();
+	drawLayerSelector();
 }
 
 function
 drawLines()
 {
-	context.strokeStyle = 'lime';
 	var cell0;
 	var cell1;
-	for (var i = 0; i < Networks.length; i++) {
-		cell0 = window.getComputedStyle(Networks[i][0]);
-		for (var j = 1; j < Networks[i].length; j++) {
-			context.beginPath();
-			cell1 = window.getComputedStyle(Networks[i][j]);
-			context.moveTo(
-			    parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
-			    parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2);
-			context.lineTo(
-			    parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
-			    parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2);
-			context.stroke();
-			cell0 = cell1;
+	for (var n = 0; n < Layers.length; n++) {
+		context.strokeStyle = "rgb(" + colormap[n].red + "," + colormap[n].green + "," + colormap[n].blue + ")";
+		if (n == currentLayer) {
+			context.lineWidth = 4;
+		} else {
+			context.lineWidth = 2;
+		}
+		for (var i = 0; i < Layers[n].Networks.length; i++) {
+			cell0 = window.getComputedStyle(Layers[n].Networks[i][0]);
+			for (var j = 1; j < Layers[n].Networks[i].length; j++) {
+				context.beginPath();
+				cell1 = window.getComputedStyle(Layers[n].Networks[i][j]);
+				context.moveTo(
+				    parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
+				    parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2);
+				context.lineTo(
+				    parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
+				    parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2);
+				context.stroke();
+				cell0 = cell1;
+			}
 		}
 	}
 }
@@ -254,6 +331,19 @@ drawSelected()
 	if (selected_old != null) {
 		selected_old.style.outlineStyle = "solid";
 		selected_old.style.outlineColor = "rgba(0, 255, 0, 0.7)";
+	}
+}
+
+function
+drawLayerSelector()
+{
+	var selector = document.getElementsByClassName("layerSelectorLayer");
+	for (var n = 0; n < selector.length; n++) {
+		if (n == currentLayer) {
+			selector[n].style.outlineStyle = "solid";
+		} else {
+			selector[n].style.outlineStyle = "none";
+		}
 	}
 }
 

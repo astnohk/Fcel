@@ -11,6 +11,7 @@
 	z-index: 100;
 	display: flex;
 	flex-direction: row;
+	align-items: center;
 	position: absolute;
 	top: 2px;
 	left: 30%;
@@ -26,7 +27,6 @@
 	outline-width: 2px;
 	outline-color: rgb(255, 100, 100);
 	font-size: 38px;
-	font-weight: bold;
 	color: rgb(255, 100, 100);
 	cursor: pointer;
 }
@@ -49,7 +49,6 @@ input[type="text"].fcel, input[type="password"].fcel {
 	font-size: 20px;
 	color: rgb(240, 240, 240);
 	background-color: rgba(20, 20, 20, 0.8);
-	cursor: default;
 }
 
 input[type="text"].fcelSum, input[type="password"].fcelSum {
@@ -70,6 +69,34 @@ input[type="text"].fcelSum, input[type="password"].fcelSum {
 	font-size: 20px;
 	color: rgb(240, 240, 240);
 	background-color: rgba(20, 20, 20, 0.8);
-	cursor: default;
+}
+
+#layerSelector {
+	display: flex;
+	flex-direction: column-reverse;
+	position: absolute;
+	top: 20px;
+	left: 40px;
+	width: 40px;
+	padding-bottom: 20px;
+	outline-style: solid;
+	outline-width: 2px;
+	outline-color: rgba(200, 200, 200, 0.6);
+	outline-offset: 6px;
+}
+
+.layerSelectorLayer {
+	display: flex;
+	position: relative;
+	top: 0px;
+	left: 0px;
+	height: 40px;
+	width: 40px;
+	margin-bottom: -20px;
+	outline-style: none;
+	outline-width: 4px;
+	outline-color: rgba(250, 250, 250, 0.9);
+	background-color: rgba(255, 0, 0, 0.5);
+	cursor: pointer;
 }
 
