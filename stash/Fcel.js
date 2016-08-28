@@ -128,6 +128,7 @@ sumCells()
 function
 draw()
 {
+	context.clearRect(0, 0, canvas.width, canvas.height);
 	drawLines();
 	drawSelected();
 }
@@ -135,7 +136,6 @@ draw()
 function
 drawLines()
 {
-	context.fillRect(0, 0, canvas.width, canvas.height);
 	context.strokeStyle = 'lime';
 	var cell0;
 	var cell1;
