@@ -27,7 +27,7 @@ var selected_old = null;
 // Events
 window.addEventListener("load", init, false);
 window.addEventListener("mousemove", draw, false);
-window.addEventListener("mousedown", draw, false);
+window.addEventListener("mousedown", function (event) { updateCells(); draw(); }, false);
 window.addEventListener("change", function (event) { updateCells(); draw(); }, false);
 
 
