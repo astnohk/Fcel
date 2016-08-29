@@ -32,7 +32,7 @@ window.addEventListener("scroll", draw, false);
 window.addEventListener("resize", draw, false);
 window.addEventListener("mousedown", function (event) { updateCells(); draw(); }, false);
 window.addEventListener("touchstart", function (event) { updateCells(); draw(); }, false);
-window.addEventListener("change", function (event) { updateCells(); draw(); }, false);
+window.addEventListener("input", function (event) { updateCells(); draw(); }, false);
 
 
 
