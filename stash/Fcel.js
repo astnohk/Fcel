@@ -321,11 +321,14 @@ updateCells()
 function
 draw()
 {
+	var sx = window.scrollX;
+	var sy = window.scrollY;
 	// Refresh
-	context.clearRect(0, 0, canvas.width, canvas.height);
+	//context.clearRect(0, 0, canvas.width, canvas.height);
+	context.clearRect(sx, sy, sx + window.innerWidth, sy + window.innerHeight);
 	// Background
 	context.fillStyle = negateColor("rgba(" + colormap[currentLayer].red + "," + colormap[currentLayer].green + "," + colormap[currentLayer].blue + ",0.1)");
-	context.fillRect(0, 0, canvas.width, canvas.height);
+	context.fillRect(sx, sy, sx + window.innerWidth, sy + window.innerHeight);
 	// Draw
 	drawLines();
 	drawSelected();
