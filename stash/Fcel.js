@@ -121,8 +121,8 @@ addCell()
 	CellsID++;
 	cell.className = "fcel";
 	cell.type = "text";
-	cell.style.top = window.innerHeight * Math.random() + "px";
-	cell.style.left = window.innerWidth * Math.random() + "px";
+	cell.style.top = (window.innerHeight - 50) * Math.random() + "px";
+	cell.style.left = (window.innerWidth - 50) * Math.random() + "px";
 	cell.addEventListener("mousedown", selectCell, false);
 	pool.appendChild(cell);
 	Cells.push(cell);
