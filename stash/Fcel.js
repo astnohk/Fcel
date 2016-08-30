@@ -260,7 +260,7 @@ updateCellsSum()
 			    net[j].layer == sumCells[i].layer) {
 				continue;
 			}
-			var num = parseInt(net[j].value, 10);
+			var num = parseFloat(net[j].value);
 			if (isNaN(num) == false) {
 				sum += num;
 			}
@@ -304,7 +304,7 @@ updateCellsProd()
 			    net[j].layer == prodCells[i].layer) {
 				continue;
 			}
-			var num = parseInt(net[j].value, 10);
+			var num = parseFloat(net[j].value, 10);
 			if (isNaN(num) == false) {
 				prod *= num;
 			}
