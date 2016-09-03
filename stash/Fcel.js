@@ -100,9 +100,9 @@ function
 addLayer()
 {
 	if (Layers.length < maxNumberOfLayers) {
+		Layers.push({});
 		var offset = 5;
 		var layerSelector = document.getElementById("layerSelector");
-		Layers.push({Networks: new Array()});
 		var selector = document.createElement("div");
 		selector.className = "layerSelectorLayer";
 		selector.id = "layer0" + (Layers.length - 1);
@@ -126,6 +126,7 @@ addCell()
 	cell.style.top = window.scrollY + (window.innerHeight - 100) * Math.random() + "px";
 	cell.style.left = window.scrollX + (window.innerWidth - 100) * Math.random() + "px";
 	cell.addEventListener("mousedown", selectCell, false);
+	cell.networks = new Array();
 	pool.appendChild(cell);
 	Cells.push(cell);
 	return cell;
@@ -136,14 +137,6 @@ deleteCell()
 {
 	if (selected == null) {
 		return;
-	}
-	for (var n = 0; n < Layers.length; n++) {
-		for (var i = 0; i < Layers[n].Networks.length; i++) {
-			var index = Layers[n].Networks[i].indexOf(selected);
-			if (index >= 0) {
-				Layers[n].Networks[i].splice(index, 1);
-			}
-		}
 	}
 	Cells.splice(Cells.indexOf(selected), 1);
 	selected.remove();
@@ -172,12 +165,34 @@ unselectCell(event)
 }
 
 function
-getNetwork(cell)
+getNetworkOnLayer(cell, layerIndex)
 {
-	for (var i = 0; i < Layers[currentLayer].Networks.length; i++) {
-		for (var j = 0; j < Layers[currentLayer].Networks[i].length; j++) {
-			if (Layers[currentLayer].Networks[i][j] == cell) {
-				return Layers[currentLayer].Networks[i];
+	var index = cell.networks.findIndex(function (net) { return net.layer == layerIndex; });
+	if (index < 0) {
+		return null;
+	} else {
+		return cell.networks[index];
+	}
+}
+
+function
+findNode(cellTarget, cellStart, layer)
+{
+	var stack = [{prev: null, cell: cellStart}];
+	var tmp;
+	while (stack.length > 0) {
+		tmp = stack.pop();
+		if (tmp.cell == cellTarget) {
+			return tmp.cell;
+		}
+		// Push nodes next to tmp to stack
+		var index = tmp.cell.networks.findIndex(function (net) { return net.layer == layer; });
+		if (index < 0) {
+			continue;
+		}
+		for (var i = 0; i < tmp.cell.networks[index].nodes.length; i++) {
+			if (tmp.cell.networks[index].nodes[i] != tmp.prev) {
+				stack.push({prev: tmp.cell, cell: tmp.cell.networks[index].nodes[i]});
 			}
 		}
 	}
@@ -185,16 +200,26 @@ getNetwork(cell)
 }
 
 function
-getNetworkOnLayer(cell, layerIndex)
+createNodeList(cell, layer)
 {
-	for (var i = 0; i < Layers[layerIndex].Networks.length; i++) {
-		for (var j = 0; j < Layers[layerIndex].Networks[i].length; j++) {
-			if (Layers[layerIndex].Networks[i][j] == cell) {
-				return Layers[layerIndex].Networks[i];
+	var nodes = [];
+	var stack = [{prev: null, cell: cell}];
+	var tmp;
+	while (stack.length > 0) {
+		tmp = stack.pop();
+		// Push nodes next to tmp to stack
+		var index = tmp.cell.networks.findIndex(function (net) { return net.layer == layer; });
+		if (index < 0) {
+			continue;
+		}
+		for (var i = 0; i < tmp.cell.networks[index].nodes.length; i++) {
+			if (tmp.cell.networks[index].nodes[i] != tmp.prev) {
+				nodes.push(tmp.cell.networks[index].nodes[i]);
+				stack.push({prev: tmp.cell, cell: tmp.cell.networks[index].nodes[i]});
 			}
 		}
 	}
-	return null;
+	return nodes;
 }
 
 function
@@ -204,34 +229,40 @@ connectSelectedCells()
 }
 
 function
-connectCells(cell0, cell1)
+connectCells(cellTarget, cellConnectTo)
 {
-	if (cell0 == null || cell1 == null) {
+	var i;
+	if (cellTarget == null || cellConnectTo == null) {
 		return;
 	}
-	var net0 = getNetwork(cell0);
-	var net1 = getNetwork(cell1);
-	if (net0 == null && net1 == null) {
-		Layers[currentLayer].Networks.push([cell0, cell1]);
-	} else if (net0 == net1) {
+	var netTarget = getNetworkOnLayer(cellTarget, currentLayer);
+	if (netTarget == null) {
+		cellTarget.networks.push({layer: currentLayer, nodes: []});
+		netTarget = cellTarget.networks[cellTarget.networks.length - 1];
+	}
+	var netConnectTo = getNetworkOnLayer(cellConnectTo, currentLayer);
+	if (netConnectTo == null) {
+		cellConnectTo.networks.push({layer: currentLayer, nodes: []});
+		netConnectTo = cellConnectTo.networks[cellConnectTo.networks.length - 1];
+	}
+	// Disconnect each other if they are already connected
+	if (netTarget.nodes.indexOf(cellConnectTo) >= 0) {
+		netTarget.nodes.splice(netTarget.nodes.indexOf(cellConnectTo), 1);
+		netConnectTo.nodes.splice(netConnectTo.nodes.indexOf(cellTarget), 1);
 		return;
-	} else if (net0 == null) {
-		net1.push(cell0);
-	} else if (net1 == null) {
-		net0.push(cell1);
-	} else {
-		Array.prototype.push.apply(net0, net1);
-		Layers[currentLayer].Networks.splice(Layers[currentLayer].Networks.indexOf(net1), 1);
+	}
+	// Decide whether they are connectable or not
+	var find = findNode(cellTarget, cellConnectTo, currentLayer);
+	if (find == null) {
+		// Add each other to nodes list
+		netTarget.nodes.push(cellConnectTo);
+		netConnectTo.nodes.push(cellTarget);
 	}
 }
 
 function
 sumSelectedNetwork()
 {
-	var net = getNetwork(selected);
-	if (net == null) {
-		return;
-	}
 	addCellSum(selected);
 }
 
@@ -243,7 +274,7 @@ addCellSum(cell)
 	cellSum.layer = currentLayer;
 	cellSum.value = 0;
 	// Connect sum cell to Network of cell
-	connectCells(selected, cellSum);
+	connectCells(cellSum, selected);
 	// Update
 	updateCellsSum();
 }
@@ -253,7 +284,10 @@ updateCellsSum()
 {
 	var sumCells = document.getElementsByClassName("fcelSum");
 	for (var i = 0; i < sumCells.length; i++) {
-		var net = getNetworkOnLayer(sumCells[i], sumCells[i].layer);
+		var net = createNodeList(sumCells[i], sumCells[i].layer);
+		if (net == null) {
+			continue;
+		}
 		var sum = 0;
 		for (var j = 0; j < net.length; j++) {
 			if ((net[j].className === "fcelSum" || net[j].className === "fcelProd") &&
@@ -272,10 +306,6 @@ updateCellsSum()
 function
 prodSelectedNetwork()
 {
-	var net = getNetwork(selected);
-	if (net == null) {
-		return;
-	}
 	addCellProd(selected);
 }
 
@@ -287,7 +317,7 @@ addCellProd(cell)
 	cellProd.layer = currentLayer;
 	cellProd.value = 0;
 	// Connect prod cell to Network of cell
-	connectCells(selected, cellProd);
+	connectCells(cellProd, selected);
 	// Update
 	updateCellsProd();
 }
@@ -297,7 +327,10 @@ updateCellsProd()
 {
 	var prodCells = document.getElementsByClassName("fcelProd");
 	for (var i = 0; i < prodCells.length; i++) {
-		var net = getNetworkOnLayer(prodCells[i], prodCells[i].layer);
+		var net = createNodeList(prodCells[i], prodCells[i].layer);
+		if (net == null) {
+			continue;
+		}
 		var prod = 1.0;
 		for (var j = 0; j < net.length; j++) {
 			if ((net[j].className === "fcelProd" || net[j].className === "fcelSum") &&
@@ -343,17 +376,19 @@ drawLines()
 	var cell0;
 	var cell1;
 	// Draw lines except current layer
-	context.lineWidth = 3;
-	for (var n = 0; n < Layers.length; n++) {
-		context.strokeStyle = "rgba(" + colormap[n].red + "," + colormap[n].green + "," + colormap[n].blue + ",0.8)";
-		if (n == currentLayer) {
-			continue;
-		}
-		for (var i = 0; i < Layers[n].Networks.length; i++) {
-			cell0 = window.getComputedStyle(Layers[n].Networks[i][0]);
-			for (var j = 1; j < Layers[n].Networks[i].length; j++) {
+	for (var n = 0; n < Cells.length; n++) {
+		cell0 = window.getComputedStyle(Cells[n]);
+		for (var i = 0; i < Cells[n].networks.length; i++) {
+			var layer = Cells[n].networks[i].layer;
+			context.strokeStyle = "rgba(" + colormap[layer].red + "," + colormap[layer].green + "," + colormap[layer].blue + ",0.8)";
+			if (layer == currentLayer) {
+				context.lineWidth = 6;
+			} else {
+				context.lineWidth = 3;
+			}
+			for (var j = 0; j < Cells[n].networks[i].nodes.length; j++) {
 				context.beginPath();
-				cell1 = window.getComputedStyle(Layers[n].Networks[i][j]);
+				cell1 = window.getComputedStyle(Cells[n].networks[i].nodes[j]);
 				context.moveTo(
 				    parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
 				    parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2);
@@ -361,26 +396,7 @@ drawLines()
 				    parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
 				    parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2);
 				context.stroke();
-				cell0 = cell1;
 			}
-		}
-	}
-	// Draw line on current layer at last
-	context.lineWidth = 6;
-	context.strokeStyle = "rgba(" + colormap[currentLayer].red + "," + colormap[currentLayer].green + "," + colormap[currentLayer].blue + ",0.8)";
-	for (var i = 0; i < Layers[currentLayer].Networks.length; i++) {
-		cell0 = window.getComputedStyle(Layers[currentLayer].Networks[i][0]);
-		for (var j = 1; j < Layers[currentLayer].Networks[i].length; j++) {
-			context.beginPath();
-			cell1 = window.getComputedStyle(Layers[currentLayer].Networks[i][j]);
-			context.moveTo(
-			    parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
-			    parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2);
-			context.lineTo(
-			    parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
-			    parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2);
-			context.stroke();
-			cell0 = cell1;
 		}
 	}
 	// Reset context
