@@ -152,13 +152,13 @@ deleteCell(cell)
 	for (var i = 0; i < cell.edges.length; i++) {
 		var index;
 		if (cell.edges[i].verticeA == cell) {
-			index = Edges[i].verticeB.findIndex(cell.edges[i]);
-			cell.edges[i].verticeB.splice(index, 1);
+			index = cell.edges[i].verticeB.edges.indexOf(cell.edges[i]);
+			cell.edges[i].verticeB.edges.splice(index, 1);
 		} else {
-			index = cell.edges[i].verticeA.findIndex(cell.edges[i]);
-			cell.edges[i].verticeA.splice(index, 1);
+			index = cell.edges[i].verticeA.edges.indexOf(cell.edges[i]);
+			cell.edges[i].verticeA.edges.splice(index, 1);
 		}
-		index = Edges.findIndex(cell.edges[i]);
+		index = Edges.indexOf(cell.edges[i]);
 		Edges.splice(index, 1);
 	}
 	Cells.splice(Cells.indexOf(cell), 1);
