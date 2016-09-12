@@ -272,7 +272,7 @@ connectCells(cellTarget, cellConnectTo, direction, layer)
 	var find = findNode(cellTarget, cellConnectTo, layer);
 	if (find == null) {
 		// Add edge
-		var newEdge = {layer: layer, direction: (direction > 0 ? 1 : 0), verticeA: cellTarget, verticeB: cellConnectTo};
+		var newEdge = {layer: layer, direction: (direction > 0 ? 1 : direction < 0 ? -1 : 0), verticeA: cellTarget, verticeB: cellConnectTo};
 		if (direction >= 0) {
 			Edges.push(newEdge);
 		} else {
@@ -413,13 +413,31 @@ drawLines()
 		} else {
 			context.lineWidth = 3;
 		}
+		var A = {
+			x: parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
+			y: parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2};
+		var B = {
+			x: parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
+			y: parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2};
 		context.beginPath();
-		context.moveTo(
-		    parseInt(cell0.left, 10) + parseInt(cell0.width, 10) / 2,
-		    parseInt(cell0.top, 10) + parseInt(cell0.height, 10) / 2);
-		context.lineTo(
-		    parseInt(cell1.left, 10) + parseInt(cell1.width, 10) / 2,
-		    parseInt(cell1.top, 10) + parseInt(cell1.height, 10) / 2);
+		context.moveTo(A.x, A.y);
+		context.lineTo(B.x, B.y);
+		if (Edges[n].direction != 0) {
+			var norm = Math.sqrt(Math.pow(A.x - B.x, 2) + Math.pow(A.y - B.y, 2));
+			var base = {x: (A.x + B.x) / 2, y: (A.y + B.y) / 2};
+			var v;
+			if (Edges.direction > 0) {
+				v = {x: (A.x - B.x) / norm * 30, y: (A.y - B.y) / norm * 30};
+			} else {
+				v = {x: (B.x - A.x) / norm * 30, y: (B.y - A.y) / norm * 30};
+			}
+			context.moveTo(base.x, base.y);
+			context.lineTo(base.x + v.x * Math.cos(Math.PI / 6.0) - v.y * Math.sin(Math.PI / 6.0),
+			    base.y + v.y * Math.cos(Math.PI / 6.0) + v.x * Math.sin(Math.PI / 6.0))
+			context.moveTo(base.x, base.y);
+			context.lineTo(base.x + v.x * Math.cos(Math.PI / 6.0) + v.y * Math.sin(Math.PI / 6.0),
+			    base.y + v.y * Math.cos(Math.PI / 6.0) - v.x * Math.sin(Math.PI / 6.0))
+		}
 		context.stroke();
 	}
 	// Reset context
