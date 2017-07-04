@@ -1,0 +1,6 @@
+[submodule "Fcel"]
+	path = Fcel
+	url = git@github.com:astnohk/Fcel.git
+[submodule "ECMASystem7"]
+	path = ECMASystem7
+	url = git@github.com:astnohk/ECMASystem7.git

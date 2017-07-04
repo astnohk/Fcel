@@ -406,7 +406,6 @@ td.tableCalendar {
 	box-sizing: content-box;
 	z-index: 10;
 	position: absolute;
-	position: absolute;
 	top: 10%;
 	left: 10%;
 	min-height: 40px;
@@ -517,5 +516,13 @@ td.tableCalendar {
 	outline-style: solid;
 	outline-width: 3px;
 	outline-color: rgb(255, 0, 0);
+}
+
+#Menu {
+	position: absolute;
+	top: 70px;
+	left: 80px;
+	border: 0;
+	background-color: rgba(0, 0, 0, 0.3);
 }
 
