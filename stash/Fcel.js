@@ -511,9 +511,9 @@ class Fcel {
 
 	drawFcel()
 	{
-		let style = window.getComputedStyle(this.rootWindow, "");
-		let sx = Math.min(window.scrollX - parseInt(style.left, 10), 0);
-		let sy = Math.min(window.scrollY - parseInt(style.top, 10), 0);
+		let style = window.getComputedStyle(this.pool, "");
+		let sx = Math.min(window.scrollX, 0);
+		let sy = Math.min(window.scrollY, 0);
 		let width = Math.min(window.innerWidth, parseInt(style.width, 10));
 		let height = Math.min(window.innerHeight, parseInt(style.height, 10));
 		// Refresh
